@@ -1,0 +1,61 @@
+{
+	"name": "n8n-nodes-superbot",
+	"version": "0.1.1",
+	"description": "n8n community node for Superbot: send a message to your Superbot agent, or continue a conversation, and get the answer back.",
+	"license": "MIT",
+	"homepage": "https://superbot.gg/docs",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/superbot-gg/n8n-nodes-superbot.git"
+	},
+	"bugs": {
+		"url": "https://github.com/superbot-gg/n8n-nodes-superbot/issues",
+		"email": "hi@superbot.gg"
+	},
+	"keywords": [
+		"n8n-community-node-package",
+		"n8n",
+		"superbot",
+		"ai",
+		"agent"
+	],
+	"author": {
+		"name": "EZO Labs Inc.",
+		"email": "hi@superbot.gg"
+	},
+	"scripts": {
+		"build": "n8n-node build",
+		"build:watch": "tsc --watch",
+		"dev": "n8n-node dev",
+		"lint": "n8n-node lint",
+		"lint:fix": "n8n-node lint --fix",
+		"release": "n8n-node release",
+		"prepublishOnly": "npm run lint && npm run build",
+		"test": "n8n-node build && node --test \"test/*.test.mjs\""
+	},
+	"files": [
+		"dist"
+	],
+	"n8n": {
+		"n8nNodesApiVersion": 1,
+		"strict": true,
+		"credentials": [
+			"dist/credentials/SuperbotApi.credentials.js"
+		],
+		"nodes": [
+			"dist/nodes/Superbot/Superbot.node.js"
+		]
+	},
+	"devDependencies": {
+		"@n8n/node-cli": "0.52.5",
+		"eslint": "9.39.5",
+		"ignore": "7.0.12",
+		"n8n-workflow": "2.43.5",
+		"prettier": "3.9.10",
+		"release-it": "20.2.1",
+		"typescript": "5.9.3"
+	},
+	"peerDependencies": {
+		"n8n-workflow": "*"
+	}
+}

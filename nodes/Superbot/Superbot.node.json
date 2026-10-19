@@ -1,0 +1,18 @@
+{
+	"node": "n8n-nodes-superbot",
+	"nodeVersion": "1.0",
+	"codexVersion": "1.0",
+	"categories": ["Productivity", "Development"],
+	"resources": {
+		"credentialDocumentation": [
+			{
+				"url": "https://superbot.gg/docs"
+			}
+		],
+		"primaryDocumentation": [
+			{
+				"url": "https://superbot.gg/docs"
+			}
+		]
+	}
+}
