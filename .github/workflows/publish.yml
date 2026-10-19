@@ -1,4 +1,4 @@
-# Dispatch-only; GitHub-hosted because npm provenance requires it.
+# Dispatch-only; GitHub-hosted because npm Trusted Publishing and provenance need GitHub-hosted runners.
 name: Publish
 
 on:
@@ -10,7 +10,8 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      # Required to mint the OIDC token behind the npm provenance statement.
+      # Lets the job mint the OIDC token that npm exchanges for a short-lived publish credential
+      # (Trusted Publishing) and that backs the provenance statement.
       id-token: write
       contents: read
 
@@ -21,8 +22,19 @@ jobs:
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 'lts/*'
-          cache: 'npm'
           registry-url: 'https://registry.npmjs.org'
+          # No dependency cache in a release build.
+          package-manager-cache: false
+
+      - name: Use an npm CLI that can publish with OIDC
+        # Trusted Publishing needs npm 11.5.1 or later (and Node 22.14.0 or later).
+        run: |
+          need=11.5.1
+          have=$(npm --version)
+          if [ "$(printf '%s\n%s\n' "$need" "$have" | sort -V | head -n 1)" != "$need" ]; then
+            npm install -g "npm@^$need"
+          fi
+          npm --version
 
       - name: Install dependencies
         run: npm ci
@@ -30,8 +42,28 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Publish with provenance
+      - name: Publish
+        # With id-token: write, npm tries OIDC first. If the package has a trusted publisher for this repository
+        # and workflow, npm publishes with the exchanged token and ignores NODE_AUTH_TOKEN. With no trusted
+        # publisher it falls back to NODE_AUTH_TOKEN.
+        # npm only turns provenance on by itself on the OIDC path, so --provenance stays for the token fallback.
+        # NPM_TOKEN is unused once an OIDC publish is proven: then delete the NPM_TOKEN secret, the env block
+        # below and --provenance.
         # prepublishOnly runs lint and build again before the tarball is packed.
         run: npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Show who npm recorded as the publisher
+        # An OIDC publish is recorded as "GitHub Actions" with a trustedPublisher entry; a token publish is
+        # recorded as the token's account. Informational only.
+        run: |
+          version=$(node -p "require('./package.json').version")
+          for _ in 1 2 3 4 5 6; do
+            if curl -fsS "https://registry.npmjs.org/n8n-nodes-superbot/$version" |
+              node -e 'const d = JSON.parse(require("fs").readFileSync(0, "utf8")); console.log(JSON.stringify({ version: d.version, _npmUser: d._npmUser, provenance: Boolean(d.dist && d.dist.attestations) }, null, 2))'; then
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "npm has not served $version yet; check _npmUser by hand"
