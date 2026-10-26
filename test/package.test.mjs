@@ -60,7 +60,7 @@ test('the node ships its codex file and both icons', () => {
 	const codex = JSON.parse(
 		readFileSync(join(root, 'dist/nodes/Superbot/Superbot.node.json'), 'utf8'),
 	);
-	assert.equal(codex.node, pkg.name);
+	assert.equal(codex.node, `${pkg.name}.superbot`);
 });
 
 test('zero runtime dependencies: no dependencies field, one peer, and n8n-workflow is the only package the build imports', () => {

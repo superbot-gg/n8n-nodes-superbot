@@ -1,6 +1,6 @@
 {
 	"name": "n8n-nodes-superbot",
-	"version": "0.1.1",
+	"version": "0.1.2",
 	"description": "n8n community node for Superbot: send a message to your Superbot agent, or continue a conversation, and get the answer back.",
 	"license": "MIT",
 	"homepage": "https://superbot.gg/docs",
